@@ -232,7 +232,10 @@ class TestDependencyBuilder(object):
         requirements_file = os.path.join(appdir, "requirements.txt")
         pip.packages_to_download(
             expected_args=["-r", requirements_file, "--dest", mock.ANY, "--exists-action", "i"],
-            packages=["foo-1.2-cp36-cp36m-manylinux1_x86_64.whl", "bar-1.2-cp36-cp36m-manylinux1_x86_64.whl"],
+            packages=[
+                "foo-1.2-cp36-cp36m-manylinux1_x86_64.whl",
+                "bar-1.2-cp36-cp36m-manylinux1_x86_64.whl",
+            ],
         )
 
         site_packages = os.path.join(appdir, ".chalice.", "site-packages")
@@ -427,7 +430,7 @@ class TestDependencyBuilder(object):
             assert req in installed_packages
 
     def test_can_get_whls_mixed_compat(self, tmpdir, osutils, pip_runner):
-        reqs = ["foo", "bar", "baz"]
+        reqs = ["foo", "bar", "baz", "qux"]
         pip, runner = pip_runner
         appdir, builder = self._make_appdir_and_dependency_builder(reqs, tmpdir, runner)
         requirements_file = os.path.join(appdir, "requirements.txt")
@@ -437,6 +440,7 @@ class TestDependencyBuilder(object):
                 "foo-1.0-cp36-none-any.whl",
                 "bar-1.2-cp36-cp36m-manylinux1_x86_64.whl",
                 "baz-1.5-cp36-cp36m-linux_x86_64.whl",
+                "qux-1.2-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
             ],
         )
 

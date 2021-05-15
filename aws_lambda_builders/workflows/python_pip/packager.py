@@ -153,9 +153,14 @@ class DependencyBuilder(object):
     _MANYLINUX_COMPATIBLE_PLATFORM = {
         "any",
         "linux_x86_64",
-        "manylinux1_x86_64",
-        "manylinux2010_x86_64",
-        "manylinux2014_x86_64",
+        "manylinux1_x86_64",  # legacy alias for "manylinux_2_5_x86_64"
+        "manylinux2010_x86_64",  # legacy alias for "manylinux_2_12_x86_64"
+        "manylinux2014_x86_64",  # legacy alias for "manylinux_2_17_x86_64"
+        # NOTE: while PEP 600 (https://www.python.org/dev/peps/pep-0600/) specifies a generic pattern "manylinux_${GLIBCMAJOR}_${GLIBCMINOR}_${ARCH}"
+        # we tend to be more restrictive in only accepting the PEP 600 platform tags below:
+        "manylinux_2_5_x86_64",
+        "manylinux_2_12_x86_64",
+        "manylinux_2_17_x86_64",
     }
     _COMPATIBLE_PACKAGE_ALLOWLIST = {"sqlalchemy"}
 
@@ -341,9 +346,11 @@ class DependencyBuilder(object):
 
     def _is_compatible_wheel_filename(self, filename):
         wheel = filename[:-4]
-        implementation, abi, platform = wheel.split("-")[-3:]
+        implementation, abi, platform_tags = wheel.split("-")[-3:]
+        platform_tags = platform_tags.split(".")
         # Verify platform is compatible
-        if platform not in self._MANYLINUX_COMPATIBLE_PLATFORM:
+        platform_compatible = any(platform in self._MANYLINUX_COMPATIBLE_PLATFORM for platform in platform_tags)
+        if not platform_compatible:
             return False
 
         lambda_runtime_abi = get_lambda_abi(self.runtime)
